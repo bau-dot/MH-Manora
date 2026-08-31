@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Lover</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            padding: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Background Video - Full HD View */
+        #bg-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        /* Light Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            z-index: 0;
+        }
+
+        /* Floating Love Emojis in Background */
+        .floating-heart {
+            position: absolute;
+            bottom: -50px;
+            font-size: 22px;
+            animation: floatUp 5s linear infinite;
+            z-index: 1;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(0.8);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-110vh) scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+        }
+
+        /* Profile Section */
+        .profile-section {
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .avatar-link {
+            display: inline-block;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .avatar-link:active {
+            transform: scale(0.95);
+        }
+
+        .avatar-ring {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(45deg, #ff007f, #00f2fe);
+            margin: 0 auto 4px auto;
+        }
+
+        .avatar-ring img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-section h1 {
+            font-size: 14px;
+            letter-spacing: 1.5px;
+            background: linear-gradient(45deg, #ff007f, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2px;
+        }
+
+        .profile-section p {
+            font-size: 8px;
+            color: #eee;
+            letter-spacing: 1px;
+            margin-bottom: 3px;
+        }
+
+        .like-badge {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 9px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s;
+            user-select: none;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .like-badge:active {
+            transform: scale(0.95);
+        }
+
+        .like-badge .sub-text {
+            color: #ccc;
+            font-size: 7px;
+        }
+
+        /* Player Card */
+        .player-card {
+            background: rgba(10, 15, 25, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 14px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .song-info {
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .song-info h2 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-info p {
+            font-size: 9px;
+            color: #ddd;
+        }
+
+        /* Timeline / Progress Bar */
+        .progress-container {
+            margin-bottom: 6px;
+            width: 100%;
+        }
+
+        #progress {
+            width: 100%;
+            appearance: none;
+            height: 3px;
+            background: linear-gradient(to right, #ffffff 0%, #ffffff 0%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.3) 100%);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #progress::-webkit-slider-thumb {
+            appearance: none;
+            width: 9px;
+            height: 9px;
+            background: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .time-codes {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8px;
+            color: #eee;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .controls button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .controls button:active {
+            transform: scale(0.9);
+        }
+
+        #play-btn {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #000;
+            font-size: 13px;
+            box-shadow: 0 2px 8px rgba(0, 242, 254, 0.4);
+        }
+
+        /* Volume Bar */
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        #volume {
+            width: 100%;
+            appearance: none;
+            height: 3px;
+            background: linear-gradient(to right, #ffffff 100%, #ffffff 100%, rgba(255, 255, 255, 0.3) 100%, rgba(255, 255, 255, 0.3) 100%);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #volume::-webkit-slider-thumb {
+            appearance: none;
+            width: 9px;
+            height: 9px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .vol-icon {
+            font-size: 9px;
+        }
+
+        /* Playlist Drawer / Box */
+        .playlist {
+            max-height: 110px;
+            overflow-y: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 6px;
+        }
+
+        .playlist::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .playlist::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 3px;
+        }
+
+        .playlist-item {
+            font-size: 9px;
+            padding: 4px 6px;
+            margin-bottom: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .playlist-item:hover, .playlist-item.active {
+            background: rgba(0, 242, 254, 0.35);
+            border-left: 2px solid #00f2fe;
+        }
+
+        .playlist-item span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 210px;
+        }
+
+        /* Click Burst Animation */
+        .burst-heart {
+            position: absolute;
+            font-size: 14px;
+            animation: burstUp 0.8s ease-out forwards;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        @keyframes burstUp {
+            0% {
+                transform: translate(0, 0) scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--rand-x), -50px) scale(1.3);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Video -->
+    <video autoplay muted loop id="bg-video">
+        <source src="bg.mp4" type="video/mp4">
+    </video>
+    <div class="overlay"></div>
+
+    <div class="container">
+        <!-- Profile & Header -->
+        <div class="profile-section">
+            <a href="https://instagram.com/rohit_tipare" target="_blank" class="avatar-link">
+                <div class="avatar-ring">
+                    <img src="profile.jpg" alt="Profile">
+                </div>
+            </a>
+            <h1>MUSIC LOVER</h1>
+            <p>MH 37 • WASHIM • MANORA</p>
+            <div class="like-badge" id="like-btn">
+                Like please 💕<br>
+                <span class="sub-text">Music by MR BABU</span>
+            </div>
+        </div>
+
+        <!-- Music Player Card -->
+        <div class="player-card">
+            <div class="song-info">
+                <h2 id="song-title">Lagi Aaj Sawan Ki</h2>
+                <p id="song-artist">Romantic Mix</p>
+            </div>
+
+            <!-- Seek Bar / Timeline -->
+            <div class="progress-container">
+                <input type="range" id="progress" value="0" min="0" max="100">
+                <div class="time-codes">
+                    <span id="current-time">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button id="shuffle-btn">🔀</button>
+                <button id="prev-btn">⏮</button>
+                <button id="play-btn">▶</button>
+                <button id="next-btn">⏭</button>
+                <button id="repeat-btn">🔁</button>
+            </div>
+
+            <!-- Volume Control -->
+            <div class="volume-container">
+                <span class="vol-icon">🔉</span>
+                <input type="range" id="volume" value="100" min="0" max="100">
+                <span class="vol-icon">🔊</span>
+            </div>
+
+            <!-- Interactive Playlist Section -->
+            <div class="playlist" id="playlist"></div>
+        </div>
+    </div>
+
+    <script>
+        // Background Floating Hearts Generator
+        const emojis = ['❤️', '💖', '💘', '🌸', '✨', '💕'];
+        setInterval(() => {
+            const heart = document.createElement('div');
+            heart.classList.add('floating-heart');
+            heart.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            heart.style.left = Math.random() * window.innerWidth + 'px';
+            heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 6000);
+        }, 400);
+
+        // Click Burst Effect on Like Badge
+        const likeBtn = document.getElementById('like-btn');
+        likeBtn.addEventListener('click', (e) => {
+            const rect = likeBtn.getBoundingClientRect();
+            const clickX = rect.left + rect.width / 2;
+            const clickY = rect.top;
+
+            for (let i = 0; i < 5; i++) {
+                const burst = document.createElement('div');
+                burst.classList.add('burst-heart');
+                burst.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                burst.style.left = clickX + 'px';
+                burst.style.top = clickY + 'px';
+                
+                const randX = (Math.random() - 0.5) * 100;
+                burst.style.setProperty('--rand-x', randX + 'px');
+                
+                document.body.appendChild(burst);
+
+                setTimeout(() => {
+                    burst.remove();
+                }, 800);
+            }
+        });
+
+        // Music Player Logic & Playlist
+        const audio = new Audio();
+        const playBtn = document.getElementById('play-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const title = document.getElementById('song-title');
+        const artist = document.getElementById('song-artist');
+        const progress = document.getElementById('progress');
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volume');
+        const playlistContainer = document.getElementById('playlist');
+
+        const songs = [
+            { title: "Lagi Aaj Sawan Ki", artist: "Romantic Mix", file: "Lagi_Aaj_Sawan_Ki.mp3" },
+            { title: "Woh Tassavur Ka Aalam", artist: "Classic", file: "Woh_Tassavur_Ka_Aalam.mp3" },
+            { title: "Yeh Dil Deewana", artist: "Superhit", file: "Yeh_Dil_Deewana.mp3" },
+            { title: "Yeh Jo Halka Halka Suroor Hai", artist: "Nusrat Fateh Ali Khan", file: "Yeh_Jo_Halka_Halka_Suroor_Hai.mp3" },
+            { title: "Yeh Vaada Raha", artist: "Classic", file: "Yeh_Vaada_Raha.mp3" },
+            { title: "Zara Tasveer Se Tu", artist: "Classic", file: "Zara_Tasveer_Se_Tu.mp3" },
+            { title: "Is Tarah Aashiqui Ka Asar", artist: "Romantic", file: "Is_Tarah_Aashiqui_Ka_Asar.mp3" },
+            { title: "Jeeta Tha Jiske Liye", artist: "90s Hit", file: "Jeeta_Tha_Jiske_Liye.mp3" },
+            { title: "Mera Dil Jis Dil Pe", artist: "90s Hit", file: "Mera_Dil_Jis_Dil_Pe.mp3" },
+            { title: "Tujhe Main Pyar Karu", artist: "Romantic", file: "Tujhe_Main_Pyar_Karu.mp3" },
+            { title: "Tujhe Na Dekhu Toh", artist: "Romantic", file: "Tujhe_Na_Dekhu_Toh.mp3" },
+            { title: "Tum Jo Aaye", artist: "Slowed & Reverb", file: "Tum_Jo_Aaye.mp3" },
+            { title: "Tumse Milne Ki Tamanna", artist: "Classic", file: "Tumse_Milne_Ki_Tamanna.mp3" },
+            { title: "Woh Ladki Bohot Yaad", artist: "Romantic", file: "Woh_Ladki_Bohot_Yaad.mp3" },
+            { title: "Woh Lamhe Woh Baatein", artist: "Atif Aslam", file: "Woh_Lamhe_Woh_Baatein.mp3" },
+            { title: "Tere Liye", artist: "Lyrical", file: "Tere_Liye.mp3" },
+            { title: "Tere Naam Humne Kiya Hai", artist: "Tere Naam", file: "Tere_Naam_Humne_Kiya_Hai.mp3" },
+            { title: "Thodi Der", artist: "Full Video", file: "Thodi_Der.mp3" },
+            { title: "To Chalun", artist: "Official", file: "To_Chalun.mp3" },
+            { title: "Toota Jo Kabhi Tara", artist: "Atif Aslam", file: "Toota_Jo_Kabhi_Tara.mp3" },
+            { title: "Tu Mujhe Kabool", artist: "Classic", file: "Tu_Mujhe_Kabool.mp3" },
+            { title: "Tu Pyar Hai Kisi Aur Ka", artist: "90s Hit", file: "Tu_Pyar_Hai_Kisi_Aur_Ka.mp3" },
+            { title: "Bas Ek Sanam", artist: "Romantic Mix", file: "Bas_Ek_Sanam.mp3" },
+            { title: "Tere Mast Mast Do", artist: "Bollywood", file: "Tere_Mast_Mast_Do.mp3" },
+            { title: "Tum Tak", artist: "A.R. Rahman", file: "Tum_Tak.mp3" },
+            { title: "Aadat Juda Hoke", artist: "Sad Version", file: "Aadat_Juda_Hoke.mp3" },
+            { title: "Aaj Se Teri", artist: "Padman", file: "Aaj_Se_Teri.mp3" },
+            { title: "Aakhir Tumhein Aana Hai", artist: "Classic", file: "Aakhir_Tumhein_Aana_Hai.mp3" },
+            { title: "Aankh Hai Bhari Bhari", artist: "Kumar Sanu", file: "Aankh_Hai_Bhari_Bhari.mp3" },
+            { title: "Aankho Se Tune Kya", artist: "Romantic", file: "Aankho_Se_Tune_Kya.mp3" },
+            { title: "Aap Ke Aa Jane Se", artist: "Classic", file: "Aap_Ke_Aa_Jane_Se.mp3" },
+            { title: "Aap Ke Pyaar Mein", artist: "Alka Yagnik", file: "Aap_Ke_Pyaar_Mein.mp3" },
+            { title: "Achchi Lagti Ho", artist: "Full Song", file: "Achchi_Lagti_Ho.mp3" },
+            { title: "Aksar Is Duniya Mein", artist: "Emraan Hashmi Hits", file: "Aksar_Is_Duniya_Mein.mp3" },
+            { title: "Tu Shayar Hai", artist: "Alka Yagnik", file: "Tu_Shayar_Hai.mp3" },
+            { title: "Anand Bhaskar & Romy", artist: "Romy", file: "Anand_Bhaskar_Romy.mp3" },
+            { title: "Aaj Se Teri (Arijit)", artist: "Arijit Singh", file: "Aaj_Se_Teri_Arijit.mp3" },
+            { title: "Teri Meri", artist: "Arijit Singh", file: "Teri_Meri.mp3" },
+            { title: "Arijit & Shreya", artist: "Duet", file: "Arijit_Shreya.mp3" },
+            { title: "Baarish", artist: "Half Girlfriend", file: "Baarish.mp3" },
+            { title: "Bahut Jatate Ho", artist: "Romantic", file: "Bahut_Jatate_Ho.mp3" },
+            { title: "Barsaat", artist: "Banjaare", file: "Barsaat.mp3" },
+            { title: "Barsaat Ke Mausam Mein", artist: "Kumar Sanu", file: "Barsaat_Ke_Mausam_Mein.mp3" },
+            { title: "Bheed Mein Tanhai", artist: "Udit Narayan", file: "Bheed_Mein_Tanhai.mp3" },
+            { title: "Chand Sifarish", artist: "Fanaa", file: "Chand_Sifarish.mp3" },
+            { title: "Channa Mereya", artist: "Arijit Singh", file: "Channa_Mereya.mp3" },
+            { title: "Dagabaaz Re", artist: "Dabangg", file: "Dagabaaz_Re.mp3" },
+            { title: "Deewaana Deewaana", artist: "Romantic", file: "Deewaana_Deewaana.mp3" },
+            { title: "Dekhne Walon Ne", artist: "Classic", file: "Dekhne_Walon_Ne.mp3" },
+            { title: "Dil Diyan Gallan", artist: "Atif Aslam", file: "Dil_Diyan_Gallan.mp3" },
+            { title: "Dil Mera Tod Diya", artist: "Sad", file: "Dil_Mera_Tod_Diya.mp3" },
+            { title: "Dil Mera Tod Tod Diya", artist: "Sad Mix", file: "Dil_Mera_Tod_Tod_Diya.mp3" },
+            { title: "Ek Mulakat Zaruri Hai", artist: "Classic", file: "Ek_Mulakat_Zaruri_Hai.mp3" },
+            { title: "Gali Mein Aaj Chand", artist: "Classic", file: "Gali_Mein_Aaj_Chand.mp3" },
+            { title: "Hum Tumko Nigahon Mein", artist: "Romantic", file: "Hum_Tumko_Nigahon_Mein.mp3" },
+            { title: "Ishq Di Baajiyaan", artist: "Diljit Dosanjh", file: "Ishq_Di_Baajiyaan.mp3" },
+            { title: "Jhanjhariya", artist: "Male Version", file: "Jhanjhariya_Male.mp3" },
+            { title: "Jo Bhi Kasmein Khai", artist: "Udit Narayan", file: "Jo_Bhi_Kasmein_Khai.mp3" },
+            { title: "Kahin Mujhe Pyar Hua", artist: "Romantic", file: "Kahin_Mujhe_Pyar_Hua.mp3" },
+            { title: "Kasam Khake Kaho", artist: "Kumar Sanu", file: "Kasam_Khake_Kaho.mp3" },
+            { title: "Kitna Pyaara Hai Yeh", artist: "Classic", file: "Kitna_Pyaara_Hai_Yeh.mp3" },
+            { title: "Kitni Hasrat Hai Ham", artist: "Romantic", file: "Kitni_Hasrat_Hai_Ham.mp3" },
+            { title: "Ladki Badi Anjani Hai", artist: "Kuch Kuch Hota Hai", file: "Ladki_Badi_Anjani_Hai.mp3" },
+            { title: "O Re Piya", artist: "Lyrical", file: "O_Re_Piya.mp3" },
+            { title: "Main Agar Saamne 1", artist: "Abhijeet", file: "Main_Agar_Saamne_1.mp3" },
+            { title: "Main Agar Saamne 2", artist: "Abhijeet", file: "Main_Agar_Saamne_2.mp3" },
+            { title: "Main Duniya Bhula Doonga", artist: "Aashiqui", file: "Main_Duniya_Bhula_Doonga.mp3" },
+            { title: "Main Ishq Uska", artist: "Full Song", file: "Main_Ishq_Uska.mp3" },
+            { title: "Maine Tum Ko Chaah", artist: "Romantic", file: "Maine_Tum_Ko_Chaah.mp3" },
+            { title: "Mera Yaar", artist: "Lyric Video", file: "Mera_Yaar.mp3" },
+            { title: "Mere Rang Mein", artist: "Classic", file: "Mere_Rang_Mein.mp3" },
+            { title: "Mohabbat Ho Na Jaaye", artist: "Kumar Sanu", file: "Mohabbat_Ho_Na_Jaaye.mp3" },
+            { title: "Mujhse Mohabbat Ka", artist: "Classic", file: "Mujhse_Mohabbat_Ka.mp3" },
+            { title: "Na Kajre Ki Dhar", artist: "Udit Narayan", file: "Na_Kajre_Ki_Dhar.mp3" },
+            { title: "Nit Khair Manga", artist: "Rahat Fateh Ali Khan", file: "Nit_Khair_Manga.mp3" },
+            { title: "O Dil Tod Ke", artist: "Sad Mix", file: "O_Dil_Tod_Ke.mp3" },
+            { title: "O O Jaane Jaana", artist: "Salman Khan", file: "O_O_Jaane_Jaana.mp3" },
+            { title: "O Sahiba O Sahiba", artist: "Dil Hai Ke Manta Nahin", file: "O_Sahiba_O_Sahiba.mp3" },
+            { title: "Oodhni", artist: "Lyrical", file: "Oodhni.mp3" },
+            { title: "Paas Woh Aane Lage", artist: "Romantic", file: "Paas_Woh_Aane_Lage.mp3" },
+            { title: "Ranjheya Ve", artist: "Zain Zohaib", file: "Ranjheya_Ve.mp3" },
+            { title: "Kun Faya Kun", artist: "Rockstar", file: "Kun_Faya_Kun.mp3" },
+            { title: "Saat Samundar Paar", artist: "Classic", file: "Saat_Samundar_Paar.mp3" },
+            { title: "Sajni", artist: "Arijit Singh", file: "Sajni.mp3" },
+            { title: "Shikwa Nahin Kisi Se", artist: "Hariharan", file: "Shikwa_Nahin_Kisi_Se.mp3" },
+            { title: "Soja Zara", artist: "Baahubali", file: "Soja_Zara.mp3" },
+            { title: "Sona Kitna Sona Hai", artist: "Govinda", file: "Sona_Kitna_Sona_Hai.mp3" },
+            { title: "Taal Se Taal Mila", artist: "Alka Yagnik", file: "Taal_Se_Taal_Mila.mp3" },
+            { title: "Tera Mera Rishta", artist: "Awarapan", file: "Tera_Mera_Rishta.mp3" },
+            { title: "Tera Naam Liya", artist: "Ram Lakhan", file: "Tera_Naam_Liya.mp3" }
+        ];
+
+        let songIndex = 0;
+
+        function buildPlaylist() {
+            playlistContainer.innerHTML = '';
+            songs.forEach((song, index) => {
+                const item = document.createElement('div');
+                item.classList.add('playlist-item');
+                if (index === songIndex) item.classList.add('active');
+                item.innerHTML = `<span>🎵 ${index + 1}. ${song.title}</span>`;
+                item.addEventListener('click', () => {
+                    songIndex = index;
+                    loadSong(songs[songIndex]);
+                    playSong();
+                    updateActivePlaylistUI();
+                });
+                playlistContainer.appendChild(item);
+            });
+        }
+
+        function updateActivePlaylistUI() {
+            const items = playlistContainer.querySelectorAll('.playlist-item');
+            items.forEach((item, index) => {
+                if (index === songIndex) {
+                    item.classList.add('active');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        function loadSong(song) {
+            title.innerText = song.title;
+            artist.innerText = song.artist;
+            audio.src = song.file;
+            progress.value = 0;
+            currentTimeEl.innerText = "0:00";
+            durationEl.innerText = "0:00";
+            updateActivePlaylistUI();
+        }
+
+        function playSong() {
+            playBtn.innerText = "⏸";
+            audio.play().catch(error => {
+                console.log("Playback error: ", error);
+            });
+        }
+
+        function pauseSong() {
+            playBtn.innerText = "▶";
+            audio.pause();
+        }
+
+        playBtn.addEventListener('click', () => {
+            const isPlaying = audio.src && !audio.paused;
+            if (isPlaying) {
+                pauseSong();
+            } else {
+                if(!audio.src) loadSong(songs[songIndex]);
+                playSong();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            songIndex = (songIndex + 1) % songs.length;
+            loadSong(songs[songIndex]);
+            playSong();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            songIndex = (songIndex - 1 + songs.length) % songs.length;
+            loadSong(songs[songIndex]);
+            playSong();
+        });
+
+        // Real-time track duration & progress updater
+        audio.addEventListener('timeupdate', (e) => {
+            const { duration, currentTime } = e.target;
+            if (duration && !isNaN(duration)) {
+                const progressPercent = (currentTime / duration) * 100;
+                progress.value = progressPercent;
+                progress.style.background = `linear-gradient(to right, #ffffff ${progressPercent}%, rgba(255, 255, 255, 0.3) ${progressPercent}%)`;
+
+                let currentMinutes = Math.floor(currentTime / 60);
+                let currentSeconds = Math.floor(currentTime % 60);
+                if (currentSeconds < 10) currentSeconds = `0${currentSeconds}`;
+                currentTimeEl.innerText = `${currentMinutes}:${currentSeconds}`;
+
+                let durationMinutes = Math.floor(duration / 60);
+                let durationSeconds = Math.floor(duration % 60);
+                if (durationSeconds < 10) durationSeconds = `0${durationSeconds}`;
+                durationEl.innerText = `${durationMinutes}:${durationSeconds}`;
+            }
+        });
+
+        // Jaise hi audio load ho, uska exact duration dikh jaye
+        audio.addEventListener('loadedmetadata', () => {
+            const duration = audio.duration;
+            if (duration && !isNaN(duration)) {
+                let durationMinutes = Math.floor(duration / 60);
+                let durationSeconds = Math.floor(duration % 60);
+                if (durationSeconds < 10) durationSeconds = `0${durationSeconds}`;
+                durationEl.innerText = `${durationMinutes}:${durationSeconds}`;
+            }
+        });
+
+        progress.addEventListener('input', (e) => {
+            const duration = audio.duration;
+            if (duration) {
+                audio.currentTime = (e.target.value / 100) * duration;
+            }
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            audio.volume = e.target.value / 100;
+            volumeSlider.style.background = `linear-gradient(to right, #ffffff ${e.target.value}%, rgba(255, 255, 255, 0.3) ${e.target.value}%)`;
+        });
+
+        audio.addEventListener('ended', () => {
+            songIndex = (songIndex + 1) % songs.length;
+            loadSong(songs[songIndex]);
+            playSong();
+        });
+
+        // Initialize Player & Playlist
+        buildPlaylist();
+        loadSong(songs[songIndex]);
+    </script>
+</body>
+</html>
